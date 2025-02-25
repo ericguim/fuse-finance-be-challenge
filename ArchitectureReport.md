@@ -5,6 +5,8 @@
 This service implements a stock trading platform using NestJS, following a layered architecture pattern with emphasis on separation of concerns and maintainability.
 I assumed that the failed transactions shouldn't be retried at first, but I've suggested adding a retry mechanism in the future, in case the user didn't replace the order with the proper price.
 
+Due to time constraints, I didn't deploy the service to the cloud, but if you guys want to discuss it further in our next meeting, I'd be happy to do it.
+
 ## Architecture Decisions
 
 ### 1. Framework Selection
