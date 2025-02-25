@@ -7,24 +7,43 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TransactionType {
+  BUY
+  SELL
+}
+
 enum TransactionStatus {
   SUCCESS
   FAILED
 }
 
 model Transaction {
-  id        String           @id @default(uuid())
+  id        String            @id @default(uuid())
   symbol    String
   quantity  Int
   price     Float
+  type      TransactionType
   status    TransactionStatus
   userId    String
-  createdAt DateTime        @default(now())
+  createdAt DateTime          @default(now())
+}
+
+model UserPortfolio {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  symbol    String
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, symbol])
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String         @id @default(uuid())
+  email     String        @unique
   name      String
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
+  portfolio UserPortfolio[]
 }
