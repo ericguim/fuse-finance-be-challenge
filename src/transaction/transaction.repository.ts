@@ -12,9 +12,9 @@ export class TransactionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async getDailyTransactions(): Promise<TransactionDto[]> {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -22,8 +22,8 @@ export class TransactionRepository {
     const transactions = await this.prisma.transaction.findMany({
       where: {
         createdAt: {
-          gte: yesterday,
-          lt: today,
+          gte: today,
+          lt: tomorrow,
         },
       },
     });

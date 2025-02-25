@@ -17,9 +17,9 @@ export class TransactionController {
     status: 200,
     description: 'Daily report generated and sent successfully',
   })
-  async generateDailyReport() {
+  async generateDailyReport(@Query('targetEmail') targetEmail: string) {
     const transactions = await this.transactionService.getDailyTransactions();
-    await this.transactionService.sendDailyReport(transactions);
+    await this.transactionService.sendDailyReport(transactions, targetEmail);
     return { message: 'Daily report generated and sent successfully' };
   }
 }

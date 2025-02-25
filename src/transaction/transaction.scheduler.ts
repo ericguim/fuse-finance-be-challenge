@@ -6,7 +6,7 @@ import { TransactionService } from './transaction.service';
 export class TransactionScheduler {
   constructor(private readonly transactionService: TransactionService) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_11PM)
   async handleDailyReport() {
     try {
       const transactions = await this.transactionService.getDailyTransactions();
