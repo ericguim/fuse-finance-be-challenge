@@ -28,7 +28,7 @@ export class FuseApiClient {
     });
   }
 
-  async getStocks(nextToken?: string): Promise<FuseStocksResponse> {
+  async getStocksData(nextToken?: string): Promise<FuseStocksResponse> {
     try {
       const response = await this.client.get<FuseStocksResponse>('/stocks', {
         params: nextToken ? { nextToken } : undefined,
