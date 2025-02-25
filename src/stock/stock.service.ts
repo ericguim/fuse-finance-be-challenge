@@ -4,7 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PortfolioItemDto } from './dto/portfolio.dto';
+import { PortfolioDto, PortfolioItemDto } from './dto/portfolio.dto';
 import { FuseApiClient, FuseStock } from './fuse-api.client';
 import { TransactionType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -14,6 +14,7 @@ import {
   TransactionStatus as TransactionStatusDTO,
 } from '../transaction/dto/transaction.dto';
 import { TransactionService } from '../transaction/transaction.service';
+import { UserService } from '../user/user.service';
 @Injectable()
 export class StocksService {
   private stockCache: NodeCache;
@@ -23,6 +24,7 @@ export class StocksService {
     private readonly fuseApiClient: FuseApiClient,
     private readonly prisma: PrismaService,
     private readonly transactionService: TransactionService,
+    private readonly userService: UserService,
   ) {
     this.stockCache = new NodeCache({
       stdTTL: this.CACHE_DURATION,
@@ -77,16 +79,40 @@ export class StocksService {
         userId,
       },
     });
-    for (const position of userPortfolio) {
-      const stockData = this.stockCache.get<FuseStock>(position.symbol);
-      if (stockData) {
-        portfolio.push({
-          symbol: position.symbol,
-          quantity: position.quantity,
-          currentPrice: stockData.price,
-        });
-      }
+    await Promise.all(
+      userPortfolio.map((position) => {
+        const stockData = this.stockCache.get<FuseStock>(position.symbol);
+        if (stockData) {
+          portfolio.push({
+            symbol: position.symbol,
+            quantity: position.quantity,
+            currentPrice: stockData.price,
+          });
+        }
+      }),
+    );
+
+    return portfolio;
+  }
+
+  async getUserPortfolio(userId: string): Promise<PortfolioDto> {
+    const user = await this.userService.findOne(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+
+    const getUserStocks = await this.fetchUserStocks(userId);
+
+    // Calculate total value and format response
+    const portfolio = {
+      userId,
+      stocks: getUserStocks,
+      totalValue: getUserStocks.reduce(
+        (total, stock) => total + stock.quantity * stock.currentPrice,
+        0,
+      ),
+    };
 
     return portfolio;
   }
@@ -98,8 +124,14 @@ export class StocksService {
     price: number,
     type: TransactionTypeDTO,
   ): Promise<TransactionDto> {
-    await this.refreshStockCache();
+    console.log('Executing transaction: ', new Date().toISOString());
+    const user = await this.userService.findOne(userId);
 
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.refreshStockCache();
+    console.log('Stock cache refreshed: ', new Date().toISOString());
     const transaction: TransactionDto = {
       userId,
       symbol,

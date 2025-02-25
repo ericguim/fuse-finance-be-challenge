@@ -52,17 +52,7 @@ export class StocksController {
     type: PortfolioDto,
   })
   async getUserPortfolio(@Param('userId') userId: string) {
-    const stocks = await this.stocksService.fetchUserStocks(userId);
-    // Calculate total value and format response
-    const portfolio = {
-      userId,
-      stocks,
-      totalValue: stocks.reduce(
-        (total, stock) => total + stock.quantity * stock.currentPrice,
-        0,
-      ),
-    };
-    return portfolio;
+    return this.stocksService.getUserPortfolio(userId);
   }
 
   @Post(':symbol/buy')
