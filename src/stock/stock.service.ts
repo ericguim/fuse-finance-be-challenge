@@ -95,30 +95,26 @@ export class StocksService {
     symbol: string,
     quantity: number,
     userId: string,
+    price: number,
     type: TransactionTypeDTO,
   ): Promise<TransactionDto> {
     await this.refreshStockCache();
-    const stock = this.stockCache.get<FuseStock>(symbol);
-
-    if (!stock) {
-      throw new NotFoundException(`Stock ${symbol} not found`);
-    }
 
     const transaction: TransactionDto = {
       userId,
       symbol,
       quantity,
-      price: stock.price,
+      price,
       type,
       status: TransactionStatusDTO.FAILED,
     };
 
     try {
       // Try to execute the purchase through Fuse API
-      await this.fuseApiClient.buyStock(symbol, stock.price, quantity);
+      await this.fuseApiClient.buyStock(symbol, price, quantity);
 
       // If successful, update user portfolio in database
-      const portfolioItem = await this.prisma.userPortfolio.upsert({
+      await this.prisma.userPortfolio.upsert({
         where: {
           userId_symbol: {
             userId,

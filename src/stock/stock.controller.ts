@@ -84,6 +84,7 @@ export class StocksController {
       symbol,
       buyStockDto.quantity,
       buyStockDto.userId,
+      buyStockDto.price,
       TransactionType.BUY,
     );
   }
