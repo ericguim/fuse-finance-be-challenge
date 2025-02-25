@@ -16,8 +16,10 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { PortfolioDto } from './dto/portfolio.dto';
-import { TransactionType } from '../transaction/dto/transaction.dto';
-import { TransactionDto } from 'src/transaction/dto/transaction.dto';
+import {
+  TransactionType,
+  TransactionDto,
+} from '../transaction/dto/transaction.dto';
 import { BuyStockDto } from './dto/buy-stock.dto';
 
 @ApiTags('stock')
